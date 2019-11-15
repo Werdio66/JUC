@@ -1,8 +1,6 @@
 package com._520.juc.interview;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -11,9 +9,9 @@ import java.util.concurrent.TimeUnit;
  *
  *   使用wait和notify/notifyAll来实现
  */
-public class T_02<T> {
+public class T_02_Synchronized<T> {
 
-    private List<T> list = new LinkedList<>();
+    private LinkedList<T> list = new LinkedList<>();
     private final static Integer MAX = 10;      // 最多十个消费者
     private static Integer count = 0;
 
@@ -26,12 +24,6 @@ public class T_02<T> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-
-        try {
-            TimeUnit.SECONDS.sleep(1);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
         System.out.println(t);
@@ -53,8 +45,7 @@ public class T_02<T> {
             }
         }
 
-        t = list.get(0);
-        list.remove(0);
+        t = list.removeFirst();
         count--;
 
         // 唤醒其余所有的线程（生产者和消费者）
@@ -66,31 +57,33 @@ public class T_02<T> {
         return count;
     }
     public static void main(String[] args) {
-        T_02<String> t_02 = new T_02<>();
+        T_02_Synchronized<String> t = new T_02_Synchronized<>();
 
+        // 消费者
         for (int i = 1; i <= 10; i++) {
             new Thread(() -> {
                 for (int j = 0; j < 5; j++) {
-                    System.out.println(Thread.currentThread().getName() + " " + t_02.get());
+                    System.out.println(Thread.currentThread().getName() + " " + t.get());
                 }
 
             },"消费者" + i).start();
         }
 
         try {
-            TimeUnit.SECONDS.sleep(1);
+            TimeUnit.SECONDS.sleep(2);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        // 生产者
         for (int i = 1; i <= 2; i++) {
             new Thread(() -> {
-                for (int j = 0; j < 10; j++) {
-                    t_02.put(Thread.currentThread().getName() + "" + j);
+                for (int j = 0; j < 25; j++) {
+                    t.put(Thread.currentThread().getName() + "  " + j);
+                    System.out.println(t.getCount());
                 }
             },"生产者" + i).start();
         }
-
 
     }
 }
